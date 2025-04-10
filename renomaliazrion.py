@@ -24,14 +24,14 @@ def G(k2):
 
 
 #Integration of angular part of A
-def I_A(p,q):
+def I_A(p2,q2):
     def integrand(x):
         k2 = max(k2,1e-10)
-        k2 = p**2 + q**2- 2*p*q*x
-        part1 = 2*(p**2-p*q*x)*(p*q*x-q**2)
+        k2 = p2 + q2- 2*np.sqrt(p2*q2)*x
+        part1 = 2*(p2*q2+x*(p2+q2)*np.sqrt(p2*q2)-p2*q2*x)
         part2 = np.sqrt(1-x**2)
 
-        return part2*G(k2)/k2*(p*q*x + part1/k2)
+        return part2*G(k2)/k2 * (np.sqrt(p2*q2)*x + part1/k2)
 
     integral,_ = quad(integrand,-1,1)
     
@@ -39,9 +39,9 @@ def I_A(p,q):
 
 
 #Integration of angular of B
-def I_B(p,q):
+def I_B(p2,q2):
     def integrand(x):
-        k2 = p**2 + q**2- 2*p*q*x
+        k2 = p2 + q2- 2*np.sqrt(p2*q2)*x
         part2 = np.sqrt(1-x**2)
 
         return part2*G(k2)/k2
