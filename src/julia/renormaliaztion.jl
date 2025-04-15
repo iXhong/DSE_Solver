@@ -144,6 +144,17 @@ function savecsv(A,B,M,Z2,Z4)
 end
 
 
+function dataPlot(A,B,M,p2_grid)
+        # Plot A, B, and M
+        p1 = plot(p2_grid, A, xscale=:log10, label="A(p²)", xlabel="p² (GeV²)", ylabel="A", title="Self-Energy")
+        plot!(p1, p2_grid, B, label="B(p²)")
+        p2 = plot(p2_grid, M, xscale=:log10, label="M(p²)", xlabel="p² (GeV²)", ylabel="M (GeV)", title="Effective Mass")
+        plot(p1, p2, layout=(2,1))
+        savefig("../../results/test.png")
+    
+end
+
+
 # Main function
 function main()
     A = ones(Float64, N)
@@ -159,13 +170,7 @@ function main()
     # npzwrite("./data/result.npz",data_dict)
 
     savecsv(A,B,M,Z2,Z4)
-
-    # Plot A, B, and M
-    p1 = plot(p2_grid, A, xscale=:log10, label="A(p²)", xlabel="p² (GeV²)", ylabel="A", title="Self-Energy")
-    plot!(p1, p2_grid, B, label="B(p²)")
-    p2 = plot(p2_grid, M, xscale=:log10, label="M(p²)", xlabel="p² (GeV²)", ylabel="M (GeV)", title="Effective Mass")
-    plot(p1, p2, layout=(2,1))
-    savefig("../../results/test.png")
+    dataPlot(A,B,M,p2_grid)
 
 end
 
