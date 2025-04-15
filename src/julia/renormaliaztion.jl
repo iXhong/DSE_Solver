@@ -1,8 +1,9 @@
+module RenormalModule
+    
 using QuadGK
 using LinearAlgebra
 using Plots
-using CSV
-using DataFrames
+using NPZ
 
 # Parameters
 const D = (0.74)^2
@@ -54,7 +55,7 @@ end
 
 # Momentum grid
 const N = 100
-const p2_min, p2_max = 1e-4, 1e4
+const p2_min, p2_max = 1e-4, 1e3
 const p2_grid = 10.0 .^ range(log10(p2_min), log10(p2_max), length=N)
 const q2_grid = copy(p2_grid)
 const dq2 = diff(q2_grid)
@@ -87,7 +88,7 @@ end
 
 
 # Iterative solver
-function iterate_AB(Z2::Float64, Z4::Float64, A::Vector{Float64}, B::Vector{Float64}; tol::Float64=10.0, max_iter::Int=10)
+function iterate_AB(Z2::Float64, Z4::Float64, A::Vector{Float64}, B::Vector{Float64}; tol::Float64=10.0, max_iter::Int=100)
     A_new = zeros(Float64, N)
     B_new = zeros(Float64, N)
     A_prime = zeros(Float64, N)
@@ -129,7 +130,7 @@ function findZ2Z4(A::Vector{Float64}, B::Vector{Float64})
     return Z2, Z4, A, B
 end
 
-#save results to csv 
+# save results to csv 
 function savecsv(A,B,M,Z2,Z4)
     data = DataFrame(
         A = A,
@@ -150,7 +151,7 @@ function dataPlot(A,B,M,p2_grid)
         plot!(p1, p2_grid, B, label="B(p²)")
         p2 = plot(p2_grid, M, xscale=:log10, label="M(p²)", xlabel="p² (GeV²)", ylabel="M (GeV)", title="Effective Mass")
         plot(p1, p2, layout=(2,1))
-        savefig("../../results/test.png")
+        savefig("./results/test.png")
     
 end
 
@@ -166,12 +167,14 @@ function main()
     M = B ./ A
     # println("M(0) = $(M[1]) GeV")
 
-    # data_dict = Dict("A"=>A,"B"=>B,"M"=>M,"Z2"=>Z2,"Z4"=>Z4)
-    # npzwrite("./data/result.npz",data_dict)
+    data_dict = Dict("A"=>A,"B"=>B,"M"=>M,"Z2"=>Z2,"Z4"=>Z4)
+    npzwrite("./results/data/result.npz",data_dict)
 
-    savecsv(A,B,M,Z2,Z4)
+    # savecsv(A,B,M,Z2,Z4)
     dataPlot(A,B,M,p2_grid)
 
 end
 
-main()
+export main, findZ2Z4, iterate_AB
+
+end #end module
