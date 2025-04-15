@@ -5,20 +5,20 @@ using CSV
 using DataFrames
 
 # Parameters
-const D = 1.0
+const D = (0.74)^2
 const Nf = 4
 const m = 5.0 #GeV 
 const ξ = 19.0 # GeV
-const γ_m = 12.0 / (33.0 - 2.0 * Nf)
+const γ_m = 12.0 / 25 #(33.0 - 2.0 * Nf)
 const τ = exp(2.0) - 1.0
 const Λ_qcd = 0.234 # GeV
 const mt = 0.5 # GeV
-const ω = 0.4 # GeV
+const ω = 0.3 # GeV
 
 # Gluon propagator (Maris-Tandy)
 function G(k2::Float64)::Float64
     k2 = max(k2, 1e-10)
-    part1 = 4.0 * π^2 / ω^6 * D * k2 / ω^2
+    part1 = 4.0 * π^2 / ω^6 * D * k2 * exp(-k2/ω^2)
     part2 = 8.0 * π^2 * γ_m / log(τ + (1.0 + k2 / Λ_qcd^2)^2)
     F = (1.0 - exp(-k2 / (4.0 * mt^2))) / k2
     return part1 * part2 * F
