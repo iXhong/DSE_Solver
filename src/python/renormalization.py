@@ -3,11 +3,11 @@ from scipy.integrate import quad
 
 
 #define parameter
-D = 1
+D = (0.74)**2
 Nf = 4
-m = 5
+m = 0.005
 xi = 19 #GeV
-gamma_m = 12/(33-2*Nf)
+gamma_m = 12/25 #12/(33-2*Nf)
 tau = np.e**2 - 1
 lambda_qcd = 0.234 #GeV
 mt = 0.5 #GeV
@@ -18,7 +18,7 @@ omega = 0.4 #GeV
 #define gluon propagator G(k^2) with Maris-Tandy model
 def G(k2): 
     k2 = max(k2,1e-10)
-    part1 = 4*np.pi**2 / omega**6 * D * k2/omega**2
+    part1 = 4*np.pi**2 / omega**6 * D *k2 * np.exp(k2/omega**2)
     part2 = 8*np.pi**2*gamma_m / (np.log(tau + (1+k2/lambda_qcd**2)**2))
     F = (1-np.exp(-k2/(4*mt**2)))/k2
 
@@ -55,7 +55,7 @@ def IntegralOfBx(p2,q2):
 
 
 #momentum grid in logspace
-N = 200
+N = 100
 p2_min, p2_max = 1e-4,1e3 #range of p^2
 p2_grid = np.logspace(np.log10(p2_min),np.log10(p2_max),N)
 q2_grid = np.logspace(np.log10(p2_min),np.log10(p2_max),N)
