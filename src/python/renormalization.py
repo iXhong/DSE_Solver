@@ -3,7 +3,7 @@ from scipy.integrate import quad
 
 
 #define parameter
-D = (0.74)**2
+D = 1
 Nf = 4
 m = 0.005
 xi = 19 #GeV
@@ -22,7 +22,7 @@ def G(k2):
     part2 = 8*np.pi**2*gamma_m / (np.log(tau + (1+k2/lambda_qcd**2)**2))
     F = (1-np.exp(-k2/(4*mt**2)))/k2
 
-    return part1*part2*F
+    return part1+part2*F
 
 
 #Integration of angular part of A
@@ -33,7 +33,7 @@ def IntegralOfAx(p2,q2):
         part1 = 2*(p2*q2+x*(p2+q2)*np.sqrt(p2*q2)-p2*q2*x)
         part2 = np.sqrt(1-x**2)
 
-        return part2*G(k2)/k2 * (np.sqrt(p2*q2)*x + part1/k2)
+        return part2*G(k2) * (np.sqrt(p2*q2)*x + part1/k2)
 
     integral,_ = quad(integrand,-1,1)
     
@@ -47,7 +47,7 @@ def IntegralOfBx(p2,q2):
         k2 = max(k2,1e-10)
         part2 = np.sqrt(1-x**2)
 
-        return part2*G(k2)/k2
+        return part2*G(k2)
     
     integral,_ = quad(integrand,-1,1)
 
