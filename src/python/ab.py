@@ -79,7 +79,7 @@ def solver(Nz:int,Np:int,xmin:float,xmax:float,max_iter:int,eps:float):
 
     xz, wz, xp, wp = gausslegendreGrid(xmin,xmax,Nz,Np)
 
-    def iterAB(p2,fArn,fBrn):
+    def intreAB(p2,fArn,fBrn):
         """
         solve A(p2),B(p2) at point p2
         Paramters:
@@ -116,11 +116,11 @@ def solver(Nz:int,Np:int,xmin:float,xmax:float,max_iter:int,eps:float):
         error = 0
 
         # calculate fA, fB at renormalization point \xi= 361GeV^2
-        fArn, fBrn = iterAB(361,fArn,fBrn)
+        fArn, fBrn = intreAB(361,fArn,fBrn)
 
-        #solve A,B at every p2 point
+        #solve A,B at every point
         for i in range(Np):
-            reA[i],reB[i] = iterAB(xp[i],fArn,fBrn)
+            reA[i],reB[i] = intreAB(xp[i],fArn,fBrn)
         
         error = np.sum(np.abs(reB - reBi))
         reAi = reA.copy()
