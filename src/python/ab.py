@@ -5,7 +5,7 @@ from scipy.special import roots_legendre
 D = (0.8**3)/0.5
 Nf = 4
 m0 = 0.0034
-xi = 361 #GeV
+xi = 361 #GeV renomalization point
 gamma_m = 12/25 #12/(33-2*Nf)
 tau = np.e**2 - 1
 lambda_qcd = 0.234 #GeV
@@ -15,6 +15,7 @@ omega = 0.5 #GeV
 
 def g(k2):
     """
+    Gluon propagator
     interaction model,use Qin-chang model
     """
     k2 = max(k2,1e-10)
@@ -28,24 +29,22 @@ def g(k2):
 def gausslegendreGrid(xp1,xp2,Nz,Np):
     """
     x, w in Gauss-Legendre points
-    Args:
-        xp1: left endpoint of p^2
-        xp2: right endpoint of p^2
+    Paramters:
+        xp1: left endpoint of momentum p^2
+        xp2: right endpoint of momentum p^2
 
     Return:
         xz,wz: Guass-legendre point in [-1,1]
         xp,wp: Guass-legendre point combined with log transform in [xp1,xp2]
 
     Note:
-        x for grid points array; w for weight array
+        x stands for grid points array; w stands for weight array
     """
-    #gausslegendre points for angular integration
-    # xz,wz = np.polynomial.legendre.leggauss(25)    
+    #gausslegendre points for angular integration 
     xz, wz = roots_legendre(Nz)
     #gausslegendre points for momentum integration
-    # xp,wp = np.polynomial.legendre.leggauss(300)
     xp, wp = roots_legendre(Np)
-    # transform to [-4,4]
+    # transform the points from [-1,1] to [-4,4]
     xp1_log, xp2_log = np.log10(xp1), np.log10(xp2)
     xp = (xp2_log-xp1_log)*xp/2 + (xp1_log+xp2_log)/2
     wp = (xp2_log-xp1_log)/2 * wp
@@ -56,22 +55,45 @@ def gausslegendreGrid(xp1,xp2,Nz,Np):
     return xz,wz,xp,wp
 
 
-def solver(Nz,Np,xmin,xmax,max_iter,eps):
+def solver(Nz:int,Np:int,xmin:float,xmax:float,max_iter:int,eps:float):
     """
     iteratively  solve A,B
+    Paramters: 
+        Nz: integration points for angular part
+        Np: integration points for momentum part
+        xmin:left endpoint of momentum 
+        xmax:right endpoint of momentum
+        max_iter: the max iteration times
+        eps: tolerance for convergence
+    Return:
+        z2
+        z4
+        reA: function A as an array
+        reB: function B as an array
+        xp:  momentum points
     """
     reAi = np.ones(Np)
     reBi = np.full(Np,0.3)
-    # reBi = np.zeros(Np)
     reA = np.zeros(Np)
     reB = np.zeros(Np)
 
     xz, wz, xp, wp = gausslegendreGrid(xmin,xmax,Nz,Np)
 
     def iterAB(p2,fArn,fBrn):
+        """
+        solve A(p2),B(p2) at point p2
+        Paramters:
+            p2: the outside momentum point
+            fArn: value of fA at renormalization point
+            fBrn: value of fB at renormalization point
+        Return:
+            Ax: A at point p2
+            Bx: B at point p2
+        """
         fA, fB = 0, 0
         for i in range(Np):
             for j in range(Nz):
+                #integrand & weights
                 dxw = xp[i]*wp[i]*np.sqrt(1-xz[j]**2)*wz[j]/(xp[i]*reAi[i]**2+reBi[i]**2)
                 pqz = np.sqrt(p2*xp[i])*xz[j]
                 k2 = p2 +xp[i]-2*pqz
@@ -87,6 +109,7 @@ def solver(Nz,Np,xmin,xmax,max_iter,eps):
         
         return Ax,Bx
     
+    #iteration part
     for iter in range(max_iter):
         fArn = 1.0
         fBrn = m0
@@ -95,10 +118,10 @@ def solver(Nz,Np,xmin,xmax,max_iter,eps):
         # calculate fA, fB at renormalization point \xi= 361GeV^2
         fArn, fBrn = iterAB(361,fArn,fBrn)
 
+        #solve A,B at every p2 point
         for i in range(Np):
             reA[i],reB[i] = iterAB(xp[i],fArn,fBrn)
         
-
         error = np.sum(np.abs(reB - reBi))
         reAi = reA.copy()
         reBi = reB.copy()
