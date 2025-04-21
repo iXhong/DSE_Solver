@@ -1,17 +1,16 @@
 import numpy as np
 from scipy.special import roots_legendre
 
-
 #define parameter
-D = 1
+D = (0.8**3)/0.5
 Nf = 4
-m0 = 0.005
+m0 = 0.0034
 xi = 361 #GeV
 gamma_m = 12/25 #12/(33-2*Nf)
 tau = np.e**2 - 1
 lambda_qcd = 0.234 #GeV
 mt = 0.5 #GeV
-omega = 0.4 #GeV
+omega = 0.5 #GeV
 
 
 def g(k2):
@@ -19,7 +18,7 @@ def g(k2):
     interaction model,use Qin-chang model
     """
     k2 = max(k2,1e-10)
-    part1 = 4*np.pi**2*D/omega**4 * np.exp(-k2/omega**2)
+    part1 = 8*np.pi**2*D/omega**4 * np.exp(-k2/omega**2)
     part2 = 8*np.pi**2*gamma_m/np.log(tau+(1+k2/lambda_qcd**2)**2)
     part3 = (1-np.exp(-k2/(4*mt**2)))/k2
 
@@ -61,71 +60,69 @@ def solver(Nz,Np,xmin,xmax,max_iter,eps):
     """
     iteratively  solve A,B
     """
-    A = np.ones(Np)
-    B = np.full(Np,0.3)
+    reAi = np.ones(Np)
+    reBi = np.full(Np,0.3)
+    # reBi = np.zeros(Np)
+    reA = np.zeros(Np)
+    reB = np.zeros(Np)
 
     xz, wz, xp, wp = gausslegendreGrid(xmin,xmax,Nz,Np)
 
-    IArn, IBrn = 1,m0
-    # for j in range(Np):
-    #     IA, IB = 0, 0    
-    #     for k in range(Nz):
-    #         dxw = xp[j]*wp[j]*np.sqrt(1-xz[k]**2)*wz[k]/(xp[j]*A[j]**2+B[j]**2)
-    #         pqz = np.sqrt(xi*xp[j])*xz[k]
-    #         k2 = xi +xp[j]-2*pqz
-    #         G_k2 = g(k2)
-    #         IArn += dxw*A[j]*G_k2*(pqz+2*(xi-pqz)*(pqz-xp[j]))/xp[j]
-    #         IBrn += dxw*B[j]*G_k2
-
-    # IArn /= 6*np.pi**3*xi
-    # IBrn /= 2*np.pi**3
-
-    for iter in range(max_iter):
-        A_old = np.copy(A)
-        B_old = np.copy(B)
+    def iterAB(p2,fArn,fBrn):
+        fA, fB = 0, 0
         for i in range(Np):
-            IA,IB = 0,0
-            for j in range(Np):
-                for k in range(Nz):
-                    dxw = xp[j]*wp[j]*np.sqrt(1-xz[k]**2)*wz[k]/(xp[j]*A_old[j]**2+B_old[j]**2)
-                    pqz = np.sqrt(xp[i]*xp[j])*xz[k]
-                    k2 = xp[i]+xp[j]-2*pqz
-                    G_k2 = g(k2)
-                    IA += dxw*A[j]*G_k2*(pqz+2*(xp[i]-pqz)*(pqz-xp[j]))/xp[j]
-                    IB += dxw*B[j]*G_k2
-            A[i] = 1 + IA / (6*np.pi**3 * xp[i]) - IArn
-            B[i] = m0 + IB / (2*np.pi**3) -IBrn
+            for j in range(Nz):
+                dxw = xp[i]*wp[i]*np.sqrt(1-xz[j]**2)*wz[j]/(xp[i]*reAi[i]**2+reBi[i]**2)
+                pqz = np.sqrt(p2*xp[i])*xz[j]
+                k2 = p2 +xp[i]-2*pqz
+                G_k2 = g(k2)
+                #integration
+                fA += dxw*reAi[i]*G_k2*(pqz+2*(p2-pqz)*(pqz-xp[i])/k2)
+                fB += dxw*reBi[i]*G_k2
 
-        error = np.sum(np.abs(B - B_old))
+        fA = 4*fA/(p2*3*8*np.pi**3)
+        fB = 4*fB/(8*np.pi**3)
+        Ax = 1 + fA - fArn
+        Bx = m0 + fB - fBrn
+        
+        return Ax,Bx
+    
+    for iter in range(max_iter):
+        fArn = 1.0
+        fBrn = m0
+        error = 0
+
+        # calculate fA, fB at renormalization point \xi= 361GeV^2
+        fArn, fBrn = iterAB(361,fArn,fBrn)
+
+        for i in range(Np):
+            reA[i],reB[i] = iterAB(xp[i],fArn,fBrn)
+        
+
+        error = np.sum(np.abs(reB - reBi))
+        reAi = reA.copy()
+        reBi = reB.copy()
+        
         print(f"Iteration {iter+1}, error = {error:.6e}")
         if error < eps:
+            z2 = 1 - fArn
+            z4 = 1 - fBrn/m0
             print(f"Converged after {iter+1} iterations")
-            z2 = 1 - IArn
-            z4 = 1 - IBrn / m0
-            print(f"z2 = {z2:.6e}, z4 = {z4:.6e}, IArn = {IArn:.6e}, IBrn = {IBrn:.6e}")
+            print(f"z2 = {z2:.6e}, z4 = {z4:.6e}, fArn = {fArn:.6e}, fBrn = {fBrn:.6e}")
             break
-
-
-    file = "../../test/abdat.npz"
-    M = B / A
-    np.savez(file=file,A=A,B=B,M=M)
+        
+    return z2,z4,reA,reB,xp
 
 
 if __name__ == "__main__":
 
     p2_min,p2_max = 1e-4,1e4
     max_iter = 1000
-    eps = 1e-4
+    eps = 1e-3
 
-    solver(Np=100,Nz=25,xmin=p2_min,xmax=p2_max,max_iter=max_iter,eps=eps)
+    z2,z4,reA,reB,xp = solver(Np=200,Nz=25,xmin=p2_min,xmax=p2_max,max_iter=max_iter,eps=eps)
 
-
-
-
-
-
-
-
-
-
+    file = "./abdat.npz"
+    M = reB / reA
+    np.savez(file=file,A=reA,B=reB,M=M,p2=xp)
 
