@@ -123,5 +123,5 @@ if __name__ == "__main__":
 
     file = "./abdat.npz"
     M = reB / reA
-    np.savez(file=file,A=reA,B=reB,M=M,p2=xp)
+    np.savez(file=file,A=reA,B=reB,M=M,p2=xp,z2=z2,z4=z4)
 
