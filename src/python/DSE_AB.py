@@ -1,3 +1,8 @@
+"""
+solve DSE at zero temperature & zero chemical potential
+@author George Liu
+@since 2025.04
+"""
 import numpy as np
 from module import gausslegendreGrid
 
