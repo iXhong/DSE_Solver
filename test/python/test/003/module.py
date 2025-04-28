@@ -31,6 +31,6 @@ def gausslegendreGrid(xp1,xp2,Nz,Np):
     wp = (xp2_log-xp1_log)/2 * wp
     #log transform to [1e-4,1e4]
     xp = 10**xp
-    wp = wp*xp*np.log(10)
+    wp = wp*xp*np.log(10)/(2*np.sqrt(xp))
 
     return xz,wz,xp,wp
