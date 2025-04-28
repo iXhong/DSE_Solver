@@ -5,6 +5,7 @@ solve DSE at zero temperature & zero chemical potential
 """
 import numpy as np
 from module import gausslegendreGrid
+from numba import jit
 
 #define parameter
 D = (0.8**3)/0.5
@@ -31,6 +32,41 @@ def g(k2):
     return part1 + part2 * part3
 
 
+@jit(nopython=True)
+def intreAB(p2,fArn,fBrn,Np,Nz,xp,wp,xz,wz,reAi,reBi):
+    """
+    solve A(p2),B(p2) at point p2
+    Paramters:
+        p2: the outside momentum point
+        fArn: value of fA at renormalization point
+        fBrn: value of fB at renormalization point
+    Return:
+        Ax: A at point p2
+        Bx: B at point p2
+    """
+    fA, fB = 0, 0
+    for i in range(Np):
+        for j in range(Nz):
+            #integrand & weights
+            dxw = xp[i]*wp[i]*np.sqrt(1-xz[j]**2)*wz[j]/(xp[i]*reAi[i]**2+reBi[i]**2)
+            pqz = np.sqrt(p2*xp[i])*xz[j]
+            k2 = max(p2 +xp[i]-2*pqz,1e-10)
+            part1 = 8*np.pi**2*D/omega**4 * np.exp(-k2/omega**2)
+            part2 = 8*np.pi**2*gamma_m/np.log(tau+(1+k2/lambda_qcd**2)**2)
+            part3 = (1-np.exp(-k2/(4*mt**2)))/k2
+            G_k2 = part1 + part2*part3
+            #integration
+            fA += dxw*reAi[i]*G_k2*(pqz+2*(p2-pqz)*(pqz-xp[i])/k2)
+            fB += dxw*reBi[i]*G_k2
+
+    fA = 4*fA/(p2*3*8*np.pi**3)
+    fB = 4*fB/(8*np.pi**3)
+    Ax = 1 + fA - fArn
+    Bx = m0 + fB - fBrn
+    
+    return Ax,Bx
+
+
 def solver(Nz:int,Np:int,xmin:float,xmax:float,max_iter:int,eps:float):
     """
     iteratively  solve A,B
@@ -54,36 +90,6 @@ def solver(Nz:int,Np:int,xmin:float,xmax:float,max_iter:int,eps:float):
     reB = np.zeros(Np)
 
     xz, wz, xp, wp = gausslegendreGrid(xmin,xmax,Nz,Np)
-
-    def intreAB(p2,fArn,fBrn):
-        """
-        solve A(p2),B(p2) at point p2
-        Paramters:
-            p2: the outside momentum point
-            fArn: value of fA at renormalization point
-            fBrn: value of fB at renormalization point
-        Return:
-            Ax: A at point p2
-            Bx: B at point p2
-        """
-        fA, fB = 0, 0
-        for i in range(Np):
-            for j in range(Nz):
-                #integrand & weights
-                dxw = xp[i]*wp[i]*np.sqrt(1-xz[j]**2)*wz[j]/(xp[i]*reAi[i]**2+reBi[i]**2)
-                pqz = np.sqrt(p2*xp[i])*xz[j]
-                k2 = p2 +xp[i]-2*pqz
-                G_k2 = g(k2)
-                #integration
-                fA += dxw*reAi[i]*G_k2*(pqz+2*(p2-pqz)*(pqz-xp[i])/k2)
-                fB += dxw*reBi[i]*G_k2
-
-        fA = 4*fA/(p2*3*8*np.pi**3)
-        fB = 4*fB/(8*np.pi**3)
-        Ax = 1 + fA - fArn
-        Bx = m0 + fB - fBrn
-        
-        return Ax,Bx
     
     #iteration part
     for iter in range(max_iter):
@@ -92,11 +98,11 @@ def solver(Nz:int,Np:int,xmin:float,xmax:float,max_iter:int,eps:float):
         error = 0
 
         # calculate fA, fB at renormalization point \xi= 361GeV^2
-        fArn, fBrn = intreAB(361,fArn,fBrn)
+        fArn, fBrn = intreAB(361,fArn,fBrn,Np,Nz,xp,wp,xz,wz,reAi,reBi)
 
         #solve A,B at every point
         for i in range(Np):
-            reA[i],reB[i] = intreAB(xp[i],fArn,fBrn)
+            reA[i],reB[i] = intreAB(xp[i],fArn,fBrn,Np,Nz,xp,wp,xz,wz,reAi,reBi)
         
         error = np.sum(np.abs(reB - reBi))
         reAi = reA.copy()
