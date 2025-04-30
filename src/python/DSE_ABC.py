@@ -10,12 +10,13 @@ from numba import njit,prange
 
 sigma = 0.4 #GeV
 T = 0.139    #GeV
-m0 = 0.5    #GeV
+m0 = 0.005    #GeV
 p2_min, p2_max = 1e-4,1e4
 max_iter = 1000
-Np = 100    #momentum points num
+Np = 50    #momentum points num
 Nz = 25     #angular points num
 Nf = 20     #frequency points num
+D0 = 0.93   #GeV^2
 
 
 @njit(parallel=True)
@@ -42,7 +43,7 @@ def IntreABC(p2, n, xp, wp, xz, wz, omega, Ai, Bi, Ci):
                 fB += fnl*3 * Bi[i, l] * jac[j] / denom
                 fC += fnl*(omega[l] * k2 * Ci[i, l] + 2 * omega_nl * (Ai[i, l] * kq + omega[l] * omega_nl * Ci[i, l])) * jac[j] / (k2 * omega[n] * denom)
 
-    cT = 16 * np.pi**2 * T / (3 * sigma**6)  # c(T)
+    cT = D0*16 * np.pi**2 * T / (3 * sigma**6)  # c(T)
     Axy = 1 + cT * fA / (2 * np.pi)**2
     Bxy = m0 + cT * fB / (2 * np.pi)**2
     Cxy = 1 + cT * fC / (2 * np.pi)**2
@@ -60,7 +61,7 @@ def solver(xmin,xmax,mu,eps):
 
     omega = (2 * np.arange(-Nf//2, Nf//2) + 1) * np.pi * T + 1j * mu
     # xz,wz,xp,wp = gausslegendreGrid(xmin,xmax,Nz,Np)
-    xz,wz,xp,wp = loggaussPiecewise(xmin,xmax,20,50,30,25)
+    xz,wz,xp,wp = loggaussPiecewise(xmin,xmax,10,30,10,25)
     
     for iter in range(max_iter):
         error = 0
@@ -94,8 +95,8 @@ if __name__ == "__main__":
 
     eps = 1e-7
     print("Ready, Run!")
-    sovle_mus(eps)
+    # sovle_mus(eps)
 
-    # A,B,C,xp,omega = solver(p2_min,p2_max,0.1,eps)
-    # file = f"./abc_test06.npz"
-    # np.savez(file=file,A=A,B=B,C=C,p2=xp,omega=omega)
+    A,B,C,xp,omega = solver(p2_min,p2_max,0.1,eps)
+    file = f"./abc_test07.npz"
+    np.savez(file=file,A=A,B=B,C=C,p2=xp,omega=omega)
