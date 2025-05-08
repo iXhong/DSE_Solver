@@ -5,7 +5,8 @@
 """
 
 import numpy as np
-from module import loggaussPiecewise
+# from module import loggaussPiecewise
+from module import gausslegendreGrid
 from numba import njit,prange
 
 sigma = 0.4 #GeV
@@ -28,17 +29,17 @@ def IntreABC(p2, n, xp, wp, xz, wz, omega, Ai, Bi, Ci):
         omega_nl = omega[n] - omega[l]
         for i in range(Np):
             denom = xp[i] * Ai[i, l]**2 + Bi[i, l]**2 + omega[l]**2*Ci[i,l]**2
-            denom = max(np.abs(denom), 1e-10)
+            denom = denom if np.abs(denom) >= 1e-10 else 1e-10+0j
             jac = xp[i] * wp[i] * wz/(2*np.sqrt(xp[i]))
             for j in range(Nz):
                 k2 = p2 + xp[i] - 2 * np.sqrt(p2 * xp[i]) * xz[j] + (omega[n] - omega[l])**2
-                k2_mag = np.abs(k2)
+                k2_mag = np.real(k2)
                 if k2_mag < 1e-10:
                     k2 = 1e-10 + 0.0j
                 pq = np.sqrt(p2 * xp[i]) * xz[j]
                 kp = p2 - pq
                 kq = -xp[i] + pq
-                fnl = k2*np.exp(-k2/sigma**2)
+                fnl = k2*np.exp(-np.real(k2)/sigma**2)
                 fA += fnl*Ai[i, l] * jac[j] * (k2 * pq + 2 * kp * kq + 2 * Ci[i, l] * omega[l] * omega_nl * kp) / (denom * k2 * p2)
                 fB += fnl*3 * Bi[i, l] * jac[j] / denom
                 fC += fnl*(omega[l] * k2 * Ci[i, l] + 2 * omega_nl * (Ai[i, l] * kq + omega[l] * omega_nl * Ci[i, l])) * jac[j] / (k2 * omega[n] * denom)
@@ -60,8 +61,8 @@ def solver(xmin,xmax,mu,eps):
     Ci = np.ones((Np, Nf), dtype=np.complex128)
 
     omega = (2 * np.arange(-Nf//2, Nf//2) + 1) * np.pi * T + 1j * mu
-    # xz,wz,xp,wp = gausslegendreGrid(xmin,xmax,Nz,Np)
-    xz,wz,xp,wp = loggaussPiecewise(xmin,xmax,10,30,10,25)
+    xz,wz,xp,wp = gausslegendreGrid(xmin,xmax,Nz,Np)
+    # xz,wz,xp,wp = loggaussPiecewise(xmin,xmax,10,30,10,25)
     
     for iter in range(max_iter):
         error = 0
@@ -86,6 +87,7 @@ def solver(xmin,xmax,mu,eps):
 def sovle_mus(eps):
     mus = np.linspace(0.0,0.2,10)
     for i,mu in enumerate(mus):
+        print(f"Round {i}")
         A,B,C,xp,omega = solver(p2_min,p2_max,mu,eps)
         np.savez(file=f"./data/abc_{i}.npz",A=A,B=B,C=C,p2=xp,omega=omega)
 
@@ -93,10 +95,10 @@ def sovle_mus(eps):
 
 if __name__ == "__main__":
 
-    eps = 1e-6
+    eps = 1e-5
     print("Ready, Run!")
-    # sovle_mus(eps)
+    sovle_mus(eps)
 
-    A,B,C,xp,omega = solver(p2_min,p2_max,0.0,eps)
-    file = f"./abc_test.npz"
-    np.savez(file=file,A=A,B=B,C=C,p2=xp,omega=omega)
+    # A,B,C,xp,omega = solver(p2_min,p2_max,0.2,eps)
+    # file = f"./abc_test_2.npz"
+    # np.savez(file=file,A=A,B=B,C=C,p2=xp,omega=omega)
