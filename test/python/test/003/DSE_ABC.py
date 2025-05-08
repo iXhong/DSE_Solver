@@ -33,9 +33,7 @@ def IntreABC(p2, n, xp, wp, xz, wz, omega, Ai, Bi, Ci):
             jac = xp[i] * wp[i] * wz/(2*np.sqrt(xp[i]))
             for j in range(Nz):
                 k2 = p2 + xp[i] - 2 * np.sqrt(p2 * xp[i]) * xz[j] + (omega[n] - omega[l])**2
-                k2_mag = np.real(k2)
-                if k2_mag < 1e-10:
-                    k2 = 1e-10 + 0.0j
+                k2 = k2 if np.real(k2) >= 1e-10 else 1e-10+0.0j
                 pq = np.sqrt(p2 * xp[i]) * xz[j]
                 kp = p2 - pq
                 kq = -xp[i] + pq
@@ -85,11 +83,11 @@ def solver(xmin,xmax,mu,eps):
 
 
 def sovle_mus(eps):
-    mus = np.linspace(0.0,0.2,10)
+    mus = np.linspace(0.0,0.2,20)
     for i,mu in enumerate(mus):
         print(f"Round {i}")
         A,B,C,xp,omega = solver(p2_min,p2_max,mu,eps)
-        np.savez(file=f"./data/abc_{i}.npz",A=A,B=B,C=C,p2=xp,omega=omega)
+        np.savez(file=f"./data/139/abc_{i}.npz",A=A,B=B,C=C,p2=xp,omega=omega)
 
 
 
@@ -97,8 +95,8 @@ if __name__ == "__main__":
 
     eps = 1e-5
     print("Ready, Run!")
-    sovle_mus(eps)
+    # sovle_mus(eps)
 
-    # A,B,C,xp,omega = solver(p2_min,p2_max,0.2,eps)
-    # file = f"./abc_test_2.npz"
-    # np.savez(file=file,A=A,B=B,C=C,p2=xp,omega=omega)
+    A,B,C,xp,omega = solver(p2_min,p2_max,0.0,eps)
+    file = f"./abc_test_2.npz"
+    np.savez(file=file,A=A,B=B,C=C,p2=xp,omega=omega)
