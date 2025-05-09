@@ -83,4 +83,4 @@ def loggaussPiecewise(xmin, xmax, N_low, N_mid, N_high,Nz, bounds=(1.0, 100.0)):
     xp = np.concatenate(xp_list)
     wp = np.concatenate(wp_list)
 
-    return xz,wz,xp,wp,
+    return xz,wz,xp,wp
