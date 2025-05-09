@@ -1,1 +1,6 @@
 __pycache__
+001
+test/python/test/002/*.png
+test/python/test/002/*.npz
+test/python/test/003/*.npz 
+test/python/test/003/*.png
