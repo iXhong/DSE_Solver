@@ -81,6 +81,18 @@ def IntreABC(p2, n, xp, wp, xz, wz, omega, Ai, Bi, Ci):
 
 
 def solver(xmin,xmax,mu,eps):
+    """
+    solve A,B,C at full range
+    # Parameters:
+        xmin: min of p2
+        xmax: max of p2
+        mu: chemical potential
+        eps: error tolerance
+    # Return:
+        A,B,C
+        xp: momentum points
+        omega: Matsubara frequency
+    """
 
     A = np.zeros((Np, Nf), dtype=np.complex128)
     B = np.zeros((Np, Nf), dtype=np.complex128)
@@ -99,7 +111,6 @@ def solver(xmin,xmax,mu,eps):
             for j in range(Nf):
                 A[i,j],B[i,j],C[i,j] = IntreABC(xp[i],j,xp,wp,xz,wz,omega,Ai,Bi,Ci)
 
-        # error = np.sum(np.abs(A - Ai)) + np.sum(np.abs(B - Bi)) + np.sum(np.abs(C - Ci))
         error = (np.sum(np.abs(A - Ai)) + np.sum(np.abs(B - Bi)) + np.sum(np.abs(C - Ci))) / (np.sum(np.abs(A)) + np.sum(np.abs(B)) + np.sum(np.abs(C)))
         Ai[:, :] = A[:, :]
         Bi[:, :] = B[:, :]
