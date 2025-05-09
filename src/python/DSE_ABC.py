@@ -125,6 +125,11 @@ def solver(xmin,xmax,mu,eps):
 
 
 def sovle_mus(eps):
+    """
+    solve DSEs under diffrent mus
+    save results into a series of npz files, 
+    name is indexed with sequence number of mu
+    """
     mus = np.linspace(0.0,0.2,10)
     for i,mu in enumerate(mus):
         print(f"Round {i}")
