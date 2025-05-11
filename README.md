@@ -48,10 +48,12 @@ DSE_Sovler 用于求解零温零化学势以及非零温零化学势下的**Dyso
 求解非零温零化学势下的DSE方程。
 ![non zero T, none zero mu](./test/python/examples/B_of_mu_for_different_T/B_of_mu_for_T.png)
 
-对于此处的非零温零化学势下的DSE方程，我只考虑了化学势，忽略了有限轴化学势。对比零温零化学势下的DSE,非零温零化学势下的DSE方程更加复杂。由于$\mu > 0$,导致了Matsubara频率$\omega_n$的引入，夸克传播子的逆由$S(p)^{-1}$变为了$S(p_k)^{-1}$，其中$p_k = (\overrightarrow{p},\widetilde{\omega}_k)$,$\widetilde{\omega}_k = \omega_k + i\mu$.同时当$\mu\ne0$时，Matsubara频率变成了一个复数，对复数的处理需要尤其小心！其余的积分思路以及迭代方法与零温零化学势下的基本一致。
+对于此处的非零温零化学势下的DSE方程，我只考虑了化学势，忽略了有限轴化学势。对比零温零化学势下的DSE,非零温零化学势下的DSE方程更加复杂。由于$`\mu > 0`$,导致了Matsubara频率$`\omega_n`$的引入，夸克传播子的逆由$`S(p)^{-1}`$变为了$`S(p_k)^{-1}`$，其中$`p_k = (\overrightarrow{p},\widetilde{\omega}_k)`$,$`\widetilde{\omega}_k = \omega_k + i\mu`$.同时当$`\mu\ne0`$时，Matsubara频率变成了一个复数，对复数的处理需要尤其小心！其余的积分思路以及迭代方法与零温零化学势下的基本一致。
 
 
 ## 参考文献
 [1] XU S S, CUI Z F, WANG B, 等. The chiral phase transition with a chiral chemical potential in the framework of Dyson-Schwinger equations[J/OL]. Physical Review D, 2015, 91(5): 056003. DOI:10.1103/PhysRevD.91.056003.
 
-[2] 强子性质与手征相变的非微扰QCD研究
+[2]徐书生.强子性质与手征相变的非微扰QCD研究[D].南京大学,2015. 
+
+[3]王昆仑. QCD相变和相的性质的Dyson-Schwinger方程方法研究[D]. 北京:北京大学,2013.
