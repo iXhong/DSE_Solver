@@ -20,6 +20,12 @@ Nf = 20     #frequency points num
 D0 = 0.93   #Gev^2
 
 
+def D(mu):
+    omega = 0.5 #GeV
+    alpha = 0.2
+    return D0*np.exp(-alpha*mu**2/omega**2)
+
+
 @njit(parallel=True)
 def IntreABC(p2, n, xp, wp, xz, wz, omega, Ai, Bi, Ci):
     fA = 0.0 + 0.0j
@@ -97,6 +103,6 @@ if __name__ == "__main__":
     print("Ready, Run!")
     # sovle_mus(eps)
 
-    A,B,C,xp,omega = solver(p2_min,p2_max,0.0,eps)
-    file = f"./abc_test_2.npz"
+    A,B,C,xp,omega = solver(p2_min,p2_max,0.1,eps)
+    file = f"./abc_test_120.npz"
     np.savez(file=file,A=A,B=B,C=C,p2=xp,omega=omega)
