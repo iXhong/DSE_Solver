@@ -21,9 +21,8 @@ D0 = 0.93   #Gev^2
 
 
 def D(mu):
-    omega = 0.5 #GeV
     alpha = 0.2
-    return D0*np.exp(-alpha*mu**2/omega**2)
+    return D0*np.exp(-alpha*mu**2/sigma**2)
 
 
 @njit(parallel=True)
@@ -48,7 +47,7 @@ def IntreABC(p2, n, xp, wp, xz, wz, omega, Ai, Bi, Ci):
                 fB += fnl*3 * Bi[i, l] * jac[j] / denom
                 fC += fnl*(omega[l] * k2 * Ci[i, l] + 2 * omega_nl * (Ai[i, l] * kq + omega[l] * omega_nl * Ci[i, l])) * jac[j] / (k2 * omega[n] * denom)
 
-    cT = D0*16 * np.pi**2 * T / (3 * sigma**6)  # c(T)
+    cT = D*16 * np.pi**2 * T / (3 * sigma**6)  # c(T)
     Axy = 1 + cT * fA / (2 * np.pi)**2
     Bxy = m0 + cT * fB / (2 * np.pi)**2
     Cxy = 1 + cT * fC / (2 * np.pi)**2
