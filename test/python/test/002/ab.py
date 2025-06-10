@@ -1,3 +1,8 @@
+"""
+ab.py
+@author George Liu
+@since 2025
+"""
 import numpy as np
 from scipy.special import roots_legendre
 from numba import jit

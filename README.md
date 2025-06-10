@@ -1,5 +1,9 @@
 # DSE Solver
 
+Copyright (c) 2025 George Liu
+All Rights Reserved
+This project is licensed under the GPL-3.0 License - see the LICENSE file for details.
+
 ## 项目介绍
 DSE_Sovler 用于求解零温零化学势以及非零温零化学势下的**Dyson-Schwinger方程**。
 该项目利用自洽迭代方法求解DS方程，迭代方案是简单固定点迭代，积分策略是高斯勒让德积分，实现了对QCD问题的非微扰计算。项目中Python和Julia两个版本的程序，均可实现求解。
@@ -18,8 +22,6 @@ DSE_Sovler 用于求解零温零化学势以及非零温零化学势下的**Dyso
 
 ## DSE_AB
 求解零温零化学势下的DSE方程。
-
-![T=0,mu=0](./test/python/examples/solve_AB/fig.png)
 
 程序中求解所使用的胶子模型是Qin-chang model,采用的截断方案是彩虹-梯近似。在此条件下，由文献可知夸克传播子的DS方程。
 由此可得夸克传播子的矢量部分$`A(p^2)`$和标量部分$`B(p^2)`$的表达式，二者组成一个非线性积分方程组，可以通过数值迭代的方法求解。
@@ -46,7 +48,6 @@ DSE_Sovler 用于求解零温零化学势以及非零温零化学势下的**Dyso
 
 ## DSE_ABC
 求解非零温零化学势下的DSE方程。
-![non zero T, none zero mu](./test/python/examples/B_of_mu_for_different_T/B_of_mu_for_T.png)
 
 对于此处的非零温零化学势下的DSE方程，我只考虑了化学势，忽略了有限轴化学势。对比零温零化学势下的DSE,非零温零化学势下的DSE方程更加复杂。由于$`\mu > 0`$,导致了Matsubara频率$`\omega_n`$的引入，夸克传播子的逆由$`S(p)^{-1}`$变为了$`S(p_k)^{-1}`$，其中$`p_k`$ = $`\left( \overrightarrow{p},\widetilde{\omega}_k \right)`$ ，$`\widetilde{\omega}_k = \omega_k + i\mu`$.同时当$`\mu\ne0`$时，Matsubara频率变成了一个复数，对复数的处理需要尤其小心！其余的积分思路以及迭代方法与零温零化学势下的基本一致。
 
