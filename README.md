@@ -1,7 +1,9 @@
 # DSE Solver
 
 Copyright (c) 2025 George Liu
+
 All Rights Reserved
+
 This project is licensed under the GPL-3.0 License - see the LICENSE file for details.
 
 ## 项目介绍
