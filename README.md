@@ -22,6 +22,12 @@ DSE_Sovler 用于求解零温零化学势以及非零温零化学势下的**Dyso
 + test/python/examples  例子
 + test/python/test      功能测试
 
+## 使用方法
++ test/python/test/002/DSE_AB.py    求解零温零化学势下的DSE方程
++ test/python/test/002/plot.py      绘图程序
++ test/python/test/003/DSE_ABC.py   求解非零温零化学势下的DSE方程
++ test/python/test/003/check.py     绘图程序
+
 ## DSE_AB
 求解零温零化学势下的DSE方程。
 
