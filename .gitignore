@@ -5,3 +5,5 @@ test/python/test/002/*.npz
 test/python/test/003/*.npz 
 test/python/test/003/*.png
 test/python/test/003/data
+test/python/test/003/mdata*
+test/python/test/003/temper
